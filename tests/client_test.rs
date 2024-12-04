@@ -9,9 +9,11 @@ mod test {
 
     const BODY: &str = r#"{"data": {"name": "FNS"}}"#;
 
-    #[monoio::test(driver = "legacy")]
+    #[monoio::test(driver = "legacy", timer = true)]
     async fn http1_tls_client() -> anyhow::Result<()> {
         let client = MonoioClient::builder()
+            .max_idle_connections(5)
+            .idle_connection_timeout(5)
             .enable_https()
             .http1_only()
             .build();
@@ -31,9 +33,11 @@ mod test {
         Ok(())
     }
 
-    #[monoio::test(driver = "legacy")]
+    #[monoio::test(driver = "legacy", timer = true)]
     async fn http2_tls_client() -> anyhow::Result<()> {
         let client = MonoioClient::builder()
+            .max_idle_connections(5)
+            .idle_connection_timeout(5)
             .enable_https()
             .http2_prior_knowledge()
             .build();
@@ -55,10 +59,12 @@ mod test {
         Ok(())
     }
 
-    #[monoio::test(driver = "legacy")]
+    #[monoio::test(driver = "legacy", timer = true)]
     // This http sets the Protocol as Auto
     async fn alpn_auto_tls_client() -> anyhow::Result<()> {
         let client = MonoioClient::builder()
+            .max_idle_connections(5)
+            .idle_connection_timeout(5)
             .enable_https()
             .build();
         let http_result = client
@@ -76,9 +82,11 @@ mod test {
         Ok(())
     }
 
-    #[monoio::test(driver = "legacy")]
+    #[monoio::test(driver = "legacy", timer = true)]
     async fn http1_non_tls_client() -> anyhow::Result<()> {
         let client = MonoioClient::builder()
+            .max_idle_connections(5)
+            .idle_connection_timeout(5)
             .http1_only()
             .build();
         let http_result = client
@@ -97,9 +105,11 @@ mod test {
         Ok(())
     }
 
-    #[monoio::test(driver = "legacy")]
+    #[monoio::test(driver = "legacy", timer = true)]
     async fn http2_non_tls_client() -> anyhow::Result<()> {
         let client = MonoioClient::builder()
+            .max_idle_connections(5)
+            .idle_connection_timeout(5)
             .http2_prior_knowledge()
             .build();
         let body = Bytes::from_static(BODY.as_ref());
@@ -120,9 +130,11 @@ mod test {
     }
 
     #[cfg(any(feature = "hyper", feature = "hyper-patch"))]
-    #[monoio::test(driver = "legacy")]
+    #[monoio::test(driver = "legacy", timer = true)]
     async fn hyper_http1_non_tls_client() -> anyhow::Result<()> {
         let client = MonoioHyperClient::builder()
+            .max_idle_connections(5)
+            .idle_connection_timeout(5)
             .http1_only()
             .build();
         let body = Bytes::from(BODY);
@@ -142,9 +154,11 @@ mod test {
     }
 
     #[cfg(any(feature = "hyper", feature = "hyper-patch"))]
-    #[monoio::test(driver = "legacy")]
+    #[monoio::test(driver = "legacy", timer = true)]
     async fn hyper_http2_non_tls_client() -> anyhow::Result<()> {
         let client = MonoioHyperClient::builder()
+            .max_idle_connections(5)
+            .idle_connection_timeout(5)
             .http2_prior_knowledge()
             .build();
         let body = Bytes::from(BODY);
@@ -164,9 +178,11 @@ mod test {
     }
 
     #[cfg(any(feature = "hyper", feature = "hyper-patch"))]
-    #[monoio::test(driver = "legacy")]
+    #[monoio::test(driver = "legacy", timer = true)]
     async fn hyper_non_tls_client() -> anyhow::Result<()> {
         let client = MonoioHyperClient::builder()
+            .max_idle_connections(5)
+            .idle_connection_timeout(5)
             .build();
         let http_result = client
             .new_request()

@@ -10,15 +10,14 @@ use monoio_transports::connectors::pollio::PollIo;
 use monoio_transports::http::hyper::{HyperH1Connector, HyperH2Connector, MonoioExecutor};
 use monoio_transports::pool::ConnectionPool;
 
+use crate::Protocol;
 use crate::error::Error;
 use crate::hyper::hyper_body::HyperBody;
-use crate::Protocol;
 use crate::request::HttpRequest;
+use crate::key::PoolKey;
 
-use super::key::TcpAddr as Key;
-
-type HyperHttp1Connector = HyperH1Connector<PollIo<TcpConnector>, Key, HyperBody>;
-type HyperHttp2Connector = HyperH2Connector<PollIo<TcpConnector>, Key, HyperBody>;
+type HyperHttp1Connector = HyperH1Connector<PollIo<TcpConnector>, PoolKey, HyperBody>;
+type HyperHttp2Connector = HyperH2Connector<PollIo<TcpConnector>, PoolKey, HyperBody>;
 
 #[derive(Default, Clone, Debug)]
 struct HyperClientConfig {
@@ -95,7 +94,7 @@ impl HyperClientBuilder {
 
     /// Sets the duration after which an idle connection in the pool will be closed.
     /// The timeout is specified in seconds.
-    pub fn idle_connections_timeout(mut self, val: u64) -> Self {
+    pub fn idle_connection_timeout(mut self, val: u64) -> Self {
         self.build_config.idle_timeout_duration = Some(Duration::from_secs(val));
         self
     }

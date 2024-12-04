@@ -7,6 +7,7 @@ mod request;
 mod response;
 mod error;
 pub mod hyper;
+mod key;
 
 #[derive(Default, Clone, PartialEq, Debug)]
 enum Protocol {

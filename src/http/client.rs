@@ -5,18 +5,18 @@ use http::{HeaderMap, Request, Uri};
 use monoio::net::TcpStream;
 use monoio_http::common::body::HttpBody;
 use monoio_transports::connectors::TlsConnector;
-use monoio_transports::connectors::{Connector, TcpConnector, TcpTlsAddr as TlsKey, TlsStream};
+use monoio_transports::connectors::{Connector, TcpConnector, TlsStream};
 use monoio_transports::http::HttpConnector;
 
 use crate::error::{Error, Result};
-use crate::hyper::key::TcpAddr as Key;
+use crate::key::PoolKey;
 use crate::Protocol;
 use crate::request::HttpRequest;
 use crate::response::Response;
 
 enum HttpConnectorType {
-    HTTP(HttpConnector<TcpConnector, Key, TcpStream>),
-    HTTPS(HttpConnector<TlsConnector<TcpConnector>, TlsKey, TlsStream<TcpStream>>),
+    HTTP(HttpConnector<TcpConnector, PoolKey, TcpStream>),
+    HTTPS(HttpConnector<TlsConnector<TcpConnector>, PoolKey, TlsStream<TcpStream>>),
 }
 
 #[derive(Default, Clone, Debug)]
@@ -89,7 +89,7 @@ impl ClientBuilder {
 
     /// Sets the duration after which an idle connection in the pool will be closed.
     /// The timeout is specified in seconds.
-    pub fn idle_connection_timeout_duration(mut self, val: u64) -> Self {
+    pub fn idle_connection_timeout(mut self, val: u64) -> Self {
         self.build_config.idle_timeout_duration = Some(Duration::from_secs(val));
         self
     }
@@ -244,9 +244,9 @@ impl MonoioClient {
         uri: Uri,
     ) -> Result<Response<HttpBody>> {
         // The connection pool keys for Non TLS and TLS based connectors slightly differ
+        let key = uri.try_into().map_err(|e| Error::UriKeyError(e))?;
         let (response, _) = match self.inner.http_connector {
             HttpConnectorType::HTTP(ref connector) => {
-                let key = uri.try_into().map_err(|e| Error::UriKeyError(e))?;
                 let mut conn = connector
                     .connect(key)
                     .await
@@ -255,7 +255,6 @@ impl MonoioClient {
             }
 
             HttpConnectorType::HTTPS(ref connector) => {
-                let key = uri.try_into().map_err(|e| Error::UriKeyError(e))?;
                 let mut conn = connector
                     .connect(key)
                     .await
